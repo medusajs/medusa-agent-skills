@@ -3,10 +3,14 @@
   "owner": {
     "name": "Medusa"
   },
+  "metadata": {
+    "description": "A collection of Claude plugins for building ecommerce applications with Medusa. Includes skills, commands, and tools for Medusa backend, admin UI, and storefront development.",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
       "name": "medusa-dev",
-      "source": "./plugins/medusa"
+      "source": "./plugins/medusa-dev"
     }
   ]
 }
