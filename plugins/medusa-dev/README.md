@@ -43,15 +43,35 @@ You should see the Medusa plugin listed under the Installed tab.
 
 In your Medusa application, ask Claude to build features. Claude will know what to load from the Medusa plugin to build your feature.
 
-For example:
+### Example Use Cases
+
+Here are some examples of what you can ask Claude to build:
+
+**Example 1: Full-stack Feature with Admin UI**
 
 > Implement a product reviews feature. Authenticated customers can add reviews. Admin users can view and approve or reject reviews from the dashboard
+
+**Example 2: Backend API Development**
+
+> Create a wishlist feature where customers can save products. I need API routes for adding/removing items and retrieving the wishlist.
+
+**Example 3: Admin Dashboard Widget**
+
+> Add a widget to the product detail page in the admin that allows managing related products. Admin users should be able to select which products are related using a searchable table.
+
+**Example 5: Storefront Integration**
+
+> Help me integrate the custom reviews API into my Next.js storefront. Show product reviews on the product detail page with pagination.
 
 ## Skills Included
 
 1. **building-with-medusa** - Backend development (modules, workflows, API routes)
 2. **building-admin-dashboard-customizations** - Admin UI development (widgets, pages, forms)
 3. **building-storefronts** - Storefront integration (SDK usage, React Query patterns)
+
+## Privacy
+
+This plugin does not collect, store, or transmit any user data or conversation information. All instructional content is provided locally through skill files, and the MCP server only queries public Medusa documentation.
 
 ## TODO
 

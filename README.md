@@ -39,3 +39,17 @@ You should see the Medusa plugin listed under the Installed tab.
 ## Usage
 
 These plugins will help you with your Medusa development. Refer to each plugin for more details on usage.
+
+## Usage with Other Agents
+
+The Medusa plugins provide skills that allows all agents to build with Medusa following best practices and conventions. All you need to do is copy the `skill` directory of a plugin into the designated skills directory of your agent.
+
+For example, if you want to use the [medusa-dev plugin](./plugins/medusa-dev/README.md), copy its skills directory into the necessary directory:
+
+1. GitHub Copilot -> supports `.claude/skills` directory.
+2. OpenCode -> supports `.opencode/skills` directory.
+3. Other agents -> check the agent's documentation.
+
+## Privacy
+
+The Medusa plugins do not collect, store, or transmit any user data or conversation information. All instructional content is provided locally through skill files, and MCP servers only query public Medusa documentation.
