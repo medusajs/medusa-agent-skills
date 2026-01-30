@@ -1,0 +1,21 @@
+{
+  "name": "ecommerce-storefront",
+  "description": "Comprehensive skills for building ecommerce storefronts with best practices for UI/UX, SEO, and mobile responsiveness",
+  "version": "1.0.5",
+  "author": {
+    "name": "Medusa"
+  },
+  "homepage": "https://medusajs.com",
+  "repository": "https://github.com/medusajs/medusa-agent-skills",
+  "keywords": [
+    "ecommerce",
+    "storefront",
+    "frontend",
+    "ui",
+    "ux",
+    "seo",
+    "responsive",
+    "components",
+    "layouts"
+  ]
+}

@@ -16,6 +16,7 @@ These skills can be used with any agent, as explained in the [Usage with Other A
 |--------|-------------|
 | [medusa-dev](plugins/medusa-dev/README.md) | Comprehensive skills for building Medusa applications across backend, admin UI, and storefronts. |
 | [learn-medusa](plugins/learn-medusa/README.md) | Interactive tutorial session to learn about Medusa concepts through building a brands feature. |
+| [ecommerce-storefront](plugins/ecommerce-storefront/README.md) | Comprehensive skill for building high-converting ecommerce storefronts with best practices. |
 
 ## Installation for Claude Code
 

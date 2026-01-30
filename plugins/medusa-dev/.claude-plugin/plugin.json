@@ -1,7 +1,7 @@
 {
   "name": "medusa-dev",
   "description": "Comprehensive skills for building Medusa applications: backend (modules, workflows, API routes), admin UI (widgets, forms, tables), and storefronts (SDK integration, React Query).",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": {
     "name": "Medusa"
   },
