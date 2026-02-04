@@ -34,7 +34,8 @@ Frontend integration guide for building storefronts with Medusa. Covers SDK usag
 |----------|----------|--------|--------|
 | 1 | SDK Usage | CRITICAL | `sdk-` |
 | 2 | React Query Patterns | HIGH | `query-` |
-| 3 | Error Handling | MEDIUM | `error-` |
+| 3 | Data Display | HIGH (includes CRITICAL price rule) | `display-` |
+| 4 | Error Handling | MEDIUM | `error-` |
 
 ## Quick Reference
 
@@ -54,7 +55,11 @@ Frontend integration guide for building storefronts with Medusa. Covers SDK usag
 - `query-keys-hierarchical` - Structure query keys hierarchically for effective cache management
 - `query-loading-states` - Always handle `isLoading`, `isPending`, `isError` states
 
-### 3. Error Handling (MEDIUM)
+### 3. Data Display (HIGH)
+
+- `display-price-format` - **CRITICAL**: Prices from Medusa are stored as-is ($49.99 = 49.99, NOT in cents). Display them directly - NEVER divide by 100
+
+### 4. Error Handling (MEDIUM)
 
 - `error-on-error` - Implement `onError` callback in mutations to handle failures
 - `error-display` - Show error messages to users when mutations fail
@@ -104,6 +109,9 @@ Before implementing, verify you're NOT doing these:
 - [ ] Using flat query keys instead of hierarchical
 - [ ] Not handling loading and error states
 - [ ] Forgetting to disable buttons during mutations (isPending)
+
+**Data Display:**
+- [ ] **CRITICAL**: Dividing prices by 100 when displaying (prices are stored as-is: $49.99 = 49.99, NOT in cents)
 
 **Error Handling:**
 - [ ] Not implementing onError callbacks

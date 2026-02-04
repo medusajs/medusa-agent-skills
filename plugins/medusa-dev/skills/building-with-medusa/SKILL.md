@@ -67,7 +67,7 @@ Frontend (admin dashboard/storefront via SDK)
 | 2 | Type Safety | CRITICAL | `type-` |
 | 3 | Business Logic Placement | HIGH | `logic-` |
 | 4 | Import & Code Organization | HIGH | `import-` |
-| 5 | Data Access Patterns | MEDIUM | `data-` |
+| 5 | Data Access Patterns | MEDIUM (includes CRITICAL price rule) | `data-` |
 | 6 | File Organization | MEDIUM | `file-` |
 
 ## Quick Reference
@@ -102,6 +102,7 @@ Frontend (admin dashboard/storefront via SDK)
 
 ### 5. Data Access Patterns (MEDIUM)
 
+- `data-price-format` - **CRITICAL**: Prices are stored as-is in Medusa (49.99 stored as 49.99, NOT in cents). Never multiply by 100 when saving or divide by 100 when displaying
 - `data-query-method` - Use `query.graph()` for retrieving data; use `query.index()` (Index Module) for filtering across linked modules
 - `data-query-graph` - Use `query.graph()` for cross-module queries with dot notation (without cross-module filtering)
 - `data-query-index` - Use `query.index()` when filtering by properties of linked data models in separate modules
@@ -179,6 +180,7 @@ Before implementing, verify you're NOT doing these:
 - [ ] Dynamic imports for workflows or modules
 
 **Data Access:**
+- [ ] **CRITICAL**: Multiplying prices by 100 when saving or dividing by 100 when displaying (prices are stored as-is: $49.99 = 49.99)
 - [ ] Filtering by linked module fields with `query.graph()` (use `query.index()` or query from other side instead)
 - [ ] Using JavaScript `.filter()` on linked data (use `query.index()` or query the linked entity directly)
 - [ ] Not using `query.graph()` for cross-module data retrieval

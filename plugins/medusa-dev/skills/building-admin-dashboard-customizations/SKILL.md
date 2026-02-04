@@ -102,9 +102,10 @@ pnpm add react-router-dom@[exact-version]
 |----------|----------|--------|--------|
 | 1 | Data Loading | CRITICAL | `data-` |
 | 2 | Design System | CRITICAL | `design-` |
-| 3 | Typography | HIGH | `typo-` |
-| 4 | Forms & Modals | MEDIUM | `form-` |
-| 5 | Selection Patterns | MEDIUM | `select-` |
+| 3 | Data Display | HIGH (includes CRITICAL price rule) | `display-` |
+| 4 | Typography | HIGH | `typo-` |
+| 5 | Forms & Modals | MEDIUM | `form-` |
+| 6 | Selection Patterns | MEDIUM | `select-` |
 
 ## Quick Reference
 
@@ -123,21 +124,25 @@ pnpm add react-router-dom@[exact-version]
 - `design-button-size` - Always use size="small" for buttons in widgets and tables
 - `design-medusa-components` - Always use Medusa UI components (Container, Button, Text), not raw HTML
 
-### 3. Typography (HIGH)
+### 3. Data Display (HIGH)
+
+- `display-price-format` - **CRITICAL**: Prices from Medusa are stored as-is ($49.99 = 49.99, NOT in cents). Display them directly - NEVER divide by 100
+
+### 4. Typography (HIGH)
 
 - `typo-text-component` - Always use Text component from @medusajs/ui, never plain span/p tags
 - `typo-labels` - Use `<Text size="small" leading="compact" weight="plus">` for labels/headings
 - `typo-descriptions` - Use `<Text size="small" leading="compact" className="text-ui-fg-subtle">` for descriptions
 - `typo-no-heading-widgets` - Never use Heading for small sections in widgets (use Text instead)
 
-### 4. Forms & Modals (MEDIUM)
+### 5. Forms & Modals (MEDIUM)
 
 - `form-focusmodal-create` - Use FocusModal for creating new entities
 - `form-drawer-edit` - Use Drawer for editing existing entities
 - `form-disable-pending` - Always disable actions during mutations (disabled={mutation.isPending})
 - `form-show-loading` - Show loading state on submit button (isLoading={mutation.isPending})
 
-### 5. Selection Patterns (MEDIUM)
+### 6. Selection Patterns (MEDIUM)
 
 - `select-small-datasets` - Use Select component for 2-10 options (statuses, types, etc.)
 - `select-large-datasets` - Use DataTable with FocusModal for large datasets (products, categories, etc.)
@@ -227,6 +232,9 @@ Before implementing, verify you're NOT doing these:
 - [ ] Forgetting size="small" on buttons in widgets
 - [ ] Not using px-6 py-4 for section padding
 - [ ] Using raw HTML elements instead of Medusa UI components
+
+**Data Display:**
+- [ ] **CRITICAL**: Dividing prices by 100 when displaying (prices are stored as-is: $49.99 = 49.99, NOT in cents)
 
 **Typography:**
 - [ ] Using plain span/p tags instead of Text component

@@ -1,7 +1,7 @@
 {
   "name": "learn-medusa",
   "description": "Interactive guided tutorial for learning Medusa development. Teaches you to build custom features step-by-step with a brands example.",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": {
     "name": "Medusa"
   },
