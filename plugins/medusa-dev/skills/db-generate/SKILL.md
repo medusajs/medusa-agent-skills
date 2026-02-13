@@ -1,4 +1,5 @@
 ---
+name: db-generate
 description: Generate database migrations for a Medusa module
 argument-hint: <module-name>
 allowed-tools: Bash(npx medusa db:generate:*)

@@ -1,4 +1,5 @@
 ---
+name: db-migrate
 description: Run database migrations in Medusa
 allowed-tools: Bash(npx medusa db:migrate:*)
 ---

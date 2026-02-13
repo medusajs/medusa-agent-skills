@@ -1,4 +1,5 @@
 ---
+name: new-user
 description: Create an admin user in Medusa
 argument-hint: <email> <password>
 allowed-tools: Bash(npx medusa user:*)
