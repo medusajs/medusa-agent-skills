@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "A collection of Claude plugins for building ecommerce applications with Medusa. Includes skills, commands, and tools for Medusa backend, admin UI, and storefront development.",
-    "version": "1.0.9"
+    "version": "1.0.10"
   },
   "plugins": [
     {
@@ -19,6 +19,10 @@
     {
       "name": "ecommerce-storefront",
       "source": "./plugins/ecommerce-storefront"
+    },
+    {
+      "name": "medusa-cloud",
+      "source": "./plugins/medusa-cloud"
     }
   ]
 }
