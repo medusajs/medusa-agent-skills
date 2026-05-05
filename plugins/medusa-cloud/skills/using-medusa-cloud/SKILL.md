@@ -1,5 +1,5 @@
 ---
-name: managing-cloud-resources
+name: using-medusa-cloud
 description: Manages Medusa Cloud resources through the Cloud CLI (mcloud). Use when deploying, debugging deployments, managing environments, environment variables, or any Medusa Cloud operation. CRITICAL for mcloud commands, deployment failures, build logs, Cloud setup, and CI/CD workflows.
 ---
 

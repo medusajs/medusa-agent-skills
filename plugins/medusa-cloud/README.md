@@ -39,7 +39,7 @@ claude
 
 ## Skills Included
 
-1. **managing-cloud-resources** - Cloud CLI operations (setup, deployments, debugging, environments, variables)
+1. **using-medusa-cloud** - Cloud CLI operations (setup, deployments, debugging, environments, variables)
 
 ## Privacy
 
