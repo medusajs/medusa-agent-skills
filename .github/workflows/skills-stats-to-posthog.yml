@@ -1,0 +1,69 @@
+name: Skills stats → PostHog
+
+# Snapshots each skill's skills.sh install count and sends it to PostHog daily,
+# so PostHog can chart install growth over time (skills.sh has no trends endpoint).
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN             Vercel access token (account → Settings → Tokens)
+#   VERCEL_ORG_ID            Vercel team/org id (from .vercel/project.json → orgId)
+#   VERCEL_PROJECT_ID        Vercel project id (from .vercel/project.json → projectId)
+#   POSTHOG_PROJECT_API_KEY  PostHog project ingestion key (phc_...)
+#
+# The Vercel secrets exist only to mint a short-lived VERCEL_OIDC_TOKEN, which
+# skills.sh requires to authenticate the (otherwise auth-gated) detail endpoint.
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC (off-peak)
+  workflow_dispatch: {} # allow manual runs for testing
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skills-stats-to-posthog
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel OIDC token
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          # Writes .env.local containing a fresh (~12h) VERCEL_OIDC_TOKEN.
+          # ORG/PROJECT ids env-link the project without `vercel link`.
+          vercel env pull .env.local \
+            --environment=development \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --yes
+          if ! grep -q '^VERCEL_OIDC_TOKEN=' .env.local; then
+            echo "::error::vercel env pull did not produce a VERCEL_OIDC_TOKEN. Is Secure Backend Access (OIDC) enabled on the project?"
+            exit 1
+          fi
+
+      - name: Snapshot install counts to PostHog
+        env:
+          POSTHOG_PROJECT_API_KEY: ${{ secrets.POSTHOG_PROJECT_API_KEY }}
+        run: |
+          set -a
+          . ./.env.local
+          set +a
+          node scripts/skills-stats-to-posthog.mjs
+
+      - name: Clean up token
+        if: always()
+        run: rm -f .env.local
