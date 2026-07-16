@@ -41,17 +41,31 @@ jobs:
 
       - name: Pull Vercel OIDC token
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          # Fail early with a clear message if any secret is missing (never print values).
+          [ -n "$VERCEL_TOKEN" ]      || { echo "::error::VERCEL_TOKEN secret is empty or unset."; exit 1; }
+          [ -n "$VERCEL_ORG_ID" ]     || { echo "::error::VERCEL_ORG_ID secret is empty or unset."; exit 1; }
+          [ -n "$VERCEL_PROJECT_ID" ] || { echo "::error::VERCEL_PROJECT_ID secret is empty or unset."; exit 1; }
+
+          # Show which account the token authenticates as (helps diagnose scope issues).
+          echo "Vercel token authenticates as: $(vercel whoami --token="$VERCEL_TOKEN" 2>&1)"
+
+          # Link the project by writing .vercel/project.json directly. Relying on
+          # VERCEL_ORG_ID/VERCEL_PROJECT_ID env-var auto-linking failed to resolve the
+          # project in CI ("Could not retrieve Project Settings"); this is deterministic.
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
           # Writes .env.local containing a fresh (~12h) VERCEL_OIDC_TOKEN.
-          # ORG/PROJECT ids env-link the project without `vercel link`.
           vercel env pull .env.local \
             --environment=development \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --token="$VERCEL_TOKEN" \
             --yes
           if ! grep -q '^VERCEL_OIDC_TOKEN=' .env.local; then
-            echo "::error::vercel env pull did not produce a VERCEL_OIDC_TOKEN. Is Secure Backend Access (OIDC) enabled on the project?"
+            echo "::error::vercel env pull did not produce a VERCEL_OIDC_TOKEN. Check that Secure Backend Access (OIDC) is enabled on the project and that VERCEL_TOKEN can access this org/project."
             exit 1
           fi
 
@@ -66,4 +80,4 @@ jobs:
 
       - name: Clean up token
         if: always()
-        run: rm -f .env.local
+        run: rm -rf .env.local .vercel
