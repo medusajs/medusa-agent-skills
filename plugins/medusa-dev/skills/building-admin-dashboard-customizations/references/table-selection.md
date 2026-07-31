@@ -274,7 +274,7 @@ const useColumns = () => {
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.after",
+  zone: "product.details",
 })
 
 export default ProductRelatedProductsWidget

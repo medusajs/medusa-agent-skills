@@ -601,7 +601,7 @@ curl "http://localhost:9000/admin/brands?fields=id,name,products.*" \
 4. Click on a product with a brand
 5. Look for your widget
 
-**Expected**: Widget appears at specified zone (e.g., top of page for `product.details.before`).
+**Expected**: Widget appears somewhere in the specified zone's section (e.g., the main section for `product.details`). Its exact position is set by the admin user in the Editor view, so don't treat "not at the top" as a failure.
 
 ### Step 2: Widget Data Test
 

@@ -99,6 +99,7 @@ Frontend (admin dashboard/storefront via SDK)
 - `import-top-level` - Import workflows/modules at file top, never use `await import()` in route body
 - `import-static-only` - Use static imports for all dependencies
 - `import-no-dynamic-routes` - Dynamic imports add overhead and break type checking
+- `import-zod-framework` - Import Zod from `@medusajs/framework/zod`, never from `zod` directly. Medusa is on **Zod v4** (since v2.14.0): use `z.email()`/`z.url()`/`z.uuid()` instead of `z.string().email()` etc., `.extend(other.shape)` instead of `.merge(other)`, `z.strictObject()`/`z.looseObject()` instead of `.strict()`/`.passthrough()`, `z.enum(MyEnum)` instead of `z.nativeEnum()`, and `z.record(z.string(), value)` instead of `z.record(value)`
 
 ### 5. Data Access Patterns (MEDIUM)
 
@@ -216,6 +217,14 @@ If the build fails:
 - Missing imports or exports
 - Type mismatches (e.g., missing `MedusaRequest<T>` type argument)
 - Incorrect workflow composition (async functions, conditionals)
+
+### Linting
+
+Since Medusa v2.16.0, projects can install `@medusajs/eslint-plugin`, which catches violations of Medusa conventions (API routes, subscribers, scheduled jobs, admin customizations, module patterns) that a type check won't.
+
+- If the project has an `eslint.config.*` with `@medusajs/eslint-plugin`, **`medusa build` and `medusa develop` run linting by default and fail on lint errors**. Fix lint errors rather than passing `--no-lint`.
+- Run linting explicitly with `npx medusa lint` (supports `--fix` and `--quiet`). Run it after implementing a feature, alongside the build.
+- If the project has no ESLint config, suggest adding it (`@medusajs/eslint-plugin`, `eslint`, and `jiti` as dev dependencies, then an `eslint.config.ts` exporting `defineConfig([...medusa.configs.recommended])`) — but don't add it unprompted.
 
 ## Next Steps - Testing Your Implementation
 

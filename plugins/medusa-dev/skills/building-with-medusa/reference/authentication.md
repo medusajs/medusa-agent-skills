@@ -495,6 +495,45 @@ const { customer } = await sdk.store.customer.retrieve()
 const { orders } = await sdk.store.customer.listOrders()
 ```
 
+**⚠️ Verification is detected at login, not registration (v2.16.0+):**
+
+`sdk.auth.login()` may return `{ verification_required: true, verification, token }` instead of a usable token. `sdk.auth.register()` no longer reports whether verification is required, and its `options`/`returnVerification` parameter was removed. Always handle the `verification_required` branch after login:
+
+```typescript
+const result = await sdk.auth.login("customer", "emailpass", { email, password })
+
+if (typeof result !== "string" && result.verification_required) {
+  // Request a code, then confirm it — note the flat, actor-agnostic signatures
+  await sdk.auth.verification.request({
+    entity_id: email,
+    entity_type: "email",
+  })
+  // ...user opens the verification link, then:
+  await sdk.auth.verification.confirm({ code })
+  // Log in again after confirming
+}
+```
+
+The old `/auth/[actor]/[provider]/verification/request` and `/confirm` routes were **removed** in v2.16.0 in favor of `/auth/verification/request` and `/auth/verification/confirm`.
+
+**Backend config:** verification requirements are declared per actor type via `projectConfig.http.authVerificationsPerActor` — the emailpass provider's `require_verification` boolean option was removed:
+
+```typescript
+// medusa-config.ts
+http: {
+  authVerificationsPerActor: {
+    user: [], // no verification required for admin users
+    customer: [{ entity_type: "email", auth_provider: "emailpass" }],
+  },
+}
+```
+
+The `auth.verification_requested` event payload also changed: `token` → `code`, `provider` → `code_provider`, `actor_type` and `provider_identity_id` removed, `entity_type` added. Guard subscribers on `entity_type !== "email"` instead of `actor_type`.
+
+**Required secrets (v2.16.0+):** the default `supersecret` fallback for `http.jwtSecret` and `http.cookieSecret` was removed. In production the app throws at startup if they aren't set — always set `JWT_SECRET` and `COOKIE_SECRET`.
+
+**MFA (v2.15.5+):** if the project uses multi-factor authentication, `AUTH_MFA_ENCRYPTION_KEY` (a random 64-character string) must be set, and if the Auth Module is declared explicitly in `medusa-config.ts`, its `mfa.encryption_key` option must point at that variable — otherwise enrolling or verifying a factor fails with "MFA encryption key is required to use MFA methods".
+
 ### Admin Authentication
 
 When using the Medusa JS SDK in admin applications:

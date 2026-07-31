@@ -64,7 +64,7 @@ const ProductBrandWidget = ({ data: product }) => {
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.before",  // Where to inject
+  zone: "product.details",  // Where to inject
 })
 
 export default ProductBrandWidget
@@ -147,7 +147,7 @@ const ProductBrandWidget = ({ data: product }: DetailWidgetProps<AdminProduct>) 
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.before",
+  zone: "product.details",
 })
 ```
 
@@ -574,18 +574,21 @@ import { TagSolid, PlusSolid } from "@medusajs/icons"
 Common widget zones:
 
 **Product Pages**:
-- `product.details.before`
-- `product.details.after`
-- `product.details.side.before`
-- `product.details.side.after`
+- `product.details`
+- `product.details.side`
+- `product.list`
 
 **Order Pages**:
-- `order.details.before`
-- `order.details.after`
+- `order.details`
+- `order.details.side`
+- `order.list`
 
 **Customer Pages**:
-- `customer.details.before`
-- `customer.details.after`
+- `customer.details`
+- `customer.details.side`
+- `customer.list`
+
+**Deprecated suffixes**: `.before` and `.after` still resolve, but since Medusa v2.17.2 they no longer control where the widget lands — admin users arrange widgets in the dashboard's Editor view (Layout Composer). Prefer the unsuffixed zone name. Ask the MedusaDocs MCP server for the full, current zone list instead of guessing.
 
 ## Best Practices
 

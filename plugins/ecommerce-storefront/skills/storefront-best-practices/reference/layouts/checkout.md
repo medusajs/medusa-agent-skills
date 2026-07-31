@@ -237,6 +237,8 @@ Collect:
 - Show "Add $X for free shipping" if close to threshold
 - Handle unavailable shipping: show message, suggest alternatives
 
+**Split shipments (Medusa v2.16.0+):** a cart can hold multiple shipping methods, one per shipping profile — so items with different fulfillment requirements (e.g. oversized vs. standard) can ship separately. If the store's shipping options span multiple profiles, group the cart items by profile and let the customer pick a method per group instead of forcing a single store-wide choice. Query the docs/MCP for the exact add-shipping-method payload (it accepts an array of options).
+
 ### Payment Method Selection
 
 **CRITICAL: Always fetch payment methods from backend and allow user to select from available options.**
@@ -305,6 +307,11 @@ const { cart: updatedCart } = await sdk.store.cart.retrieve(cart.id)
 - Other providers: Implement according to provider requirements
 
 **Important:** Payment provider IDs are returned from the backend (e.g., `pp_stripe_stripe`, `pp_system_manual`). Map these to user-friendly display names in your UI.
+
+**Async payment methods (Medusa v2.17.2+):** some payment methods (bank debits, vouchers, several Klarna/SEPA flows) aren't confirmed during checkout — the provider confirms them later via webhook. Don't design the confirmation step to assume payment succeeded the moment the order is placed:
+- Show a "payment pending" state on the order confirmation page rather than "paid".
+- Never gate order placement on a synchronous payment success response.
+- Tell the customer what happens next (they'll get an email once payment clears).
 
 **Digital wallets (mobile priority):**
 - Apple Pay / Google Pay should be prominent on mobile

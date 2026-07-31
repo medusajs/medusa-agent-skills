@@ -683,7 +683,7 @@ An **API Route** is a REST endpoint that exposes your features to clients:
 We use **Zod** to validate request bodies. Create `src/api/admin/brands/validators.ts`:
 
 ```typescript
-import { z } from "zod"
+import { z } from "@medusajs/framework/zod"
 
 export const PostAdminCreateBrand = z.object({
   name: z.string(),

@@ -233,7 +233,7 @@ Let validation middleware handle input validation errors:
 // ✅ GOOD: Middleware handles validation
 // middlewares.ts
 const MySchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   age: z.number().min(18, "Must be at least 18 years old"),
 })
 

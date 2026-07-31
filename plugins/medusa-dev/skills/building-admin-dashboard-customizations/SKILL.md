@@ -344,11 +344,21 @@ const MyWidget = ({ data }: DetailWidgetProps<HttpTypes.AdminProduct>) => {
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.after",
+  zone: "product.details",
 })
 
 export default MyWidget
 ```
+
+**⚠️ `.before` / `.after` no longer control placement (v2.17.2+):**
+
+Since the Layout Composer landed, admin users arrange components — including widgets — through the dashboard's Editor view, and the arrangement is persisted in the database. The `.before` and `.after` zone suffixes are **deprecated**: a widget in `product.details.before` and one in `product.details.after` land in the same injection zone, and the final order is whatever the user configured.
+
+- Don't promise the user a specific position based on the suffix. Say "the widget appears in the product details page and can be repositioned in the Editor view".
+- `.side` is still meaningful — it targets the side column of two-column page layouts.
+- For new widgets, prefer the unsuffixed zone (e.g. `product.details`) unless the project already standardizes on a suffix.
+
+Newer zones added in v2.16.0 cover draft orders, gift cards, and store credit accounts (`draft_order.*`, `gift_card.*`, `store_credit_account.*`, in `details`/`list`/`side` variants). Ask the MedusaDocs MCP server for the authoritative zone list rather than guessing a zone name.
 
 **UI Routes** create new admin pages:
 
@@ -366,6 +376,40 @@ export const config = defineRouteConfig({
 
 export default CustomPage
 ```
+
+**Browser tab title (v2.17.2+):** by default a UI route's tab title is its `label`. Export a `handle` with an `seo` resolver to override it, including dynamically from the route's `loader` data:
+
+```tsx
+// src/admin/routes/brands/[id]/page.tsx
+import { UIMatch } from "react-router-dom"
+
+export const handle = {
+  seo: (match: UIMatch<BrandResponse>) => ({
+    title: match.data?.brand.name || "Brand",
+  }),
+}
+```
+
+If `seo` returns no title, the dashboard falls back to the sidebar label, then the breadcrumb, then `Medusa`.
+
+**Custom injection zones (v2.16.0+):** custom pages — most usefully in plugins — can expose their own widget injection zones by laying the page out with `LayoutComposer` from `@medusajs/dashboard/components`:
+
+```tsx
+import { LayoutComposer } from "@medusajs/dashboard/components"
+
+const BrandDetailsPage = () => (
+  <LayoutComposer
+    widgetsZonePrefix="brand.details"   // exposes "brand.details" and "brand.details.side"
+    preferredLayoutId="core:two-column"
+    data={brand}                        // passed to widgets as their `data` prop
+    sections={{ main: <GeneralSection brand={brand} />, side: <MediaSection brand={brand} /> }}
+  />
+)
+```
+
+- Name zones `{resource}.{page-context}` (e.g. `brand.list`, `brand.details`), plus `.side` for the side section. **Never** add `.before`/`.after`.
+- Register the zones in the `InjectionZoneRegistry` interface for type checking and autocompletion in `defineWidgetConfig`, and include `"../../.medusa/types/augmentation-refs.d.ts"` in `src/admin/tsconfig.json`'s `include` array.
+- A build warning about an unknown zone is expected for custom zones — verify the zone name is spelled correctly rather than ignoring it blindly.
 
 ## Common Issues & Solutions
 
@@ -411,9 +455,11 @@ Log in with your admin credentials.
 
 **For Widgets:**
 Navigate to the page where your widget is displayed. Common widget zones:
-- **Product widgets:** Go to Products → Select a product → Your widget appears in the zone you configured (e.g., `product.details.after`)
-- **Order widgets:** Go to Orders → Select an order → Your widget appears in the configured zone
-- **Customer widgets:** Go to Customers → Select a customer → Your widget appears in the configured zone
+- **Product widgets:** Go to Products → Select a product → Your widget appears on the page
+- **Order widgets:** Go to Orders → Select an order → Your widget appears on the page
+- **Customer widgets:** Go to Customers → Select a customer → Your widget appears on the page
+
+Its exact position within the page is controlled by the user in the dashboard's Editor view (Layout Composer), not by the zone's `.before`/`.after` suffix. Tell the user they can drag the widget where they want it.
 
 **For UI Routes (Custom Pages):**
 - Look for your custom page in the admin sidebar/navigation (based on the `label` you configured)

@@ -139,11 +139,46 @@ export const config: SubscriberConfig = {
 "cart.updated" // Cart was updated
 ```
 
+### Inventory Events
+
+**All of the events below were added in v2.17.3** — they don't exist in earlier versions.
+
+```typescript
+"inventory-item.created" // Inventory items were created
+"inventory-item.updated" // Inventory items were updated
+"inventory-item.deleted" // Inventory items were deleted
+"inventory-level.created" // Inventory levels were created
+"inventory-level.updated" // Stocked/reserved quantity changed (e.g. during fulfillment)
+"inventory-level.deleted" // Inventory levels were deleted
+```
+
+Use these to sync stock to external systems or alert on low levels. `inventory-level.updated` carries `{ id, order_id? }` — `order_id` is set when the change came from an order flow.
+
 ### Auth Events
 
 ```typescript
 "auth.password_reset" // Password reset was requested
+"auth.verification_requested" // A verification code was generated (v2.15.5+)
+"auth.mfa_enabled" // An MFA factor was enabled (v2.15.5+)
+"auth.mfa_disabled" // An MFA factor was disabled
+"auth.mfa_recovery_codes_generated" // Recovery codes were generated
 ```
+
+**⚠️ `auth.verification_requested` payload changed in v2.16.0.** It is now:
+
+```typescript
+{
+  entity_id      // The identifier being verified, e.g. an email address
+  entity_type    // e.g. "email"
+  code_provider  // Defaults to "token"
+  auth_identity_id
+  code           // The verification code — was called `token` before v2.16.0
+  expires_at
+  metadata
+}
+```
+
+`token`, `actor_type`, `provider`, and `provider_identity_id` are **gone**. In subscribers, build the verification URL from `code`, and guard on `entity_type` (e.g. `if (entity_type !== "email") return`) instead of `actor_type`.
 
 ### Invite Events
 

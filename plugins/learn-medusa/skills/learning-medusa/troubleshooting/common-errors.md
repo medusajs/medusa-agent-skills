@@ -211,7 +211,7 @@ pnpm add @tanstack/react-query@5.x.x
 **Causes and Solutions**:
 
 **Cause 1**: Wrong zone name
-- **Solution**: Use exact zone: `"product.details.before"`
+- **Solution**: Use exact zone: `"product.details"`
 
 **Cause 2**: Config not exported
 - **Solution**: Export config:

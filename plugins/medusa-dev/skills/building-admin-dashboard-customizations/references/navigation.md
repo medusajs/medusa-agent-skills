@@ -313,7 +313,7 @@ const RelatedProductsWidget = ({ data: product }) => {
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.after",
+  zone: "product.details",
 })
 
 export default RelatedProductsWidget

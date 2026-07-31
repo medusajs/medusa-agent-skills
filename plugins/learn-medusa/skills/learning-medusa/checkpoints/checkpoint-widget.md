@@ -69,7 +69,7 @@ Show me your `src/admin/widgets/product-brand.tsx` file.
 - [ ] Handles loading state
 - [ ] Displays brand name or "-" if no brand
 - [ ] Uses Container, Heading, and Text components
-- [ ] Exports config: `defineWidgetConfig({ zone: "product.details.before" })`
+- [ ] Exports config: `defineWidgetConfig({ zone: "product.details" })`
 - [ ] Default exports component
 
 ### 3. Dev Server Running
@@ -129,12 +129,12 @@ pnpm add @tanstack/react-query@5.x.x
 **Causes and Fixes**:
 
 **Cause 1**: Wrong zone name
-- **Fix**: Use exact zone: `"product.details.before"`
+- **Fix**: Use exact zone: `"product.details"`
 
 **Cause 2**: Config not exported
 - **Fix**: Ensure you export config:
   ```typescript
-  export const config = defineWidgetConfig({ zone: "product.details.before" })
+  export const config = defineWidgetConfig({ zone: "product.details" })
   ```
 
 **Cause 3**: File not in correct location
@@ -210,13 +210,13 @@ import { Container, Heading, Text } from "@medusajs/ui"
 
 **Symptom**: Widget shows after all other sections
 
-**Cause**: Wrong zone used
+**Cause**: Not a bug. Since Medusa v2.17.2, position within a zone is controlled by the admin user, not the zone name — the `.before`/`.after` suffixes are deprecated.
 
 **Fix**:
-Use `"product.details.before"` zone (not `.after`):
+Keep the unsuffixed zone and reposition the widget in the dashboard's Editor view (Layout Composer); the arrangement is saved.
 ```typescript
 export const config = defineWidgetConfig({
-  zone: "product.details.before",
+  zone: "product.details",
 })
 ```
 
@@ -242,7 +242,7 @@ Verify each of these steps:
 
 - [ ] SDK initialized in src/admin/lib/sdk.ts
 - [ ] Widget file created in src/admin/widgets/
-- [ ] Widget appears on product detail page (before other sections)
+- [ ] Widget appears on product detail page (anywhere in the main section)
 - [ ] Shows brand name for products with brands
 - [ ] Shows "-" for products without brands
 - [ ] Styling matches other admin widgets
@@ -260,25 +260,21 @@ Admin Product Detail Page
 │  Page Header                       │
 │  (Medusa Core)                     │
 ├────────────────────────────────────┤
-│  ← zone: product.details.before    │ ← Your widget injected here
-│  ┌──────────────────────────────┐ │
-│  │   Your Widget:               │ │
-│  │   Brand: Nike                │ │
-│  └──────────────────────────────┘ │
-├────────────────────────────────────┤
-│  Product Information               │
-│  (Medusa Core)                     │
-├────────────────────────────────────┤
-│  Variants Section                  │
-│  (Medusa Core)                     │
-├────────────────────────────────────┤
-│  ← zone: product.details.after     │
+│  zone: product.details (main)      │
+│                                    │
+│  Product Information (Core)        │
+│  Variants Section (Core)           │
+│  ┌──────────────────────────────┐  │
+│  │   Your Widget:               │  │  ← injected into the same zone;
+│  │   Brand: Nike                │  │    order set by the user in the
+│  └──────────────────────────────┘  │    Editor view (Layout Composer)
 └────────────────────────────────────┘
 ```
 
 **Why widgets matter**:
 - **Non-invasive**: Extend pages without modifying core code
 - **Composable**: Multiple widgets can use the same zone
+- **User-arrangeable**: Admin users reorder page components, including widgets, in the Editor view (v2.17.2+)
 - **Upgrade safe**: Core page updates don't break your widgets
 - **Contextual**: Receive page data as props
 

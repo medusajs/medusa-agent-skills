@@ -65,9 +65,11 @@ export const sdk = new Medusa({
 A **widget** is a React component injected into existing admin pages at predefined zones.
 
 **Common zones**:
-- `product.details.before` - Top of product details page
-- `product.details.after` - Bottom of product details page
-- `order.details.before` - Top of order details page
+- `product.details` - Main section of the product details page
+- `product.details.side` - Side column of the product details page
+- `order.details` - Main section of the order details page
+
+**Note**: Since Medusa v2.17.2, the `.before` and `.after` zone suffixes are deprecated. Widgets in a zone are ordered by the admin user in the dashboard's Editor view (the Layout Composer), and the arrangement is saved. Use the unsuffixed zone name and let the user position the widget.
 
 Create `src/admin/widgets/product-brand.tsx`:
 
@@ -125,7 +127,7 @@ const ProductBrandWidget = ({
 }
 
 export const config = defineWidgetConfig({
-  zone: "product.details.before",
+  zone: "product.details",
 })
 
 export default ProductBrandWidget
@@ -161,7 +163,7 @@ useQuery({
 **4. Widget Configuration**:
 ```tsx
 export const config = defineWidgetConfig({
-  zone: "product.details.before",
+  zone: "product.details",
 })
 ```
 - Defines where widget appears
@@ -184,7 +186,7 @@ export const config = defineWidgetConfig({
 
 3. **Navigate to product**: Go to Products → Select a product with a brand
 
-4. **Verify widget**: See brand widget at the top of the page
+4. **Verify widget**: See brand widget in the page's main section (drag it where you want it in the Editor view)
 
 ### Common Issues
 

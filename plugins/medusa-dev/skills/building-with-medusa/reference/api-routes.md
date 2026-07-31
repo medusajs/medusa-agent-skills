@@ -70,10 +70,10 @@ export default defineMiddlewares({
 ```typescript
 // api/store/[feature]/middlewares.ts
 import { MiddlewareRoute, validateAndTransformBody } from "@medusajs/framework"
-import { z } from "zod"
+import { z } from "@medusajs/framework/zod"
 
 export const CreateMySchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().min(2),
   // other fields
 })
@@ -186,7 +186,7 @@ Create a Zod schema for the query parameters. Since query parameters are origina
 
 ```typescript
 // api/custom/validators.ts
-import { z } from "zod"
+import { z } from "@medusajs/framework/zod"
 
 export const GetMyRouteSchema = z.object({
   cart_id: z.string(), // String parameters don't need preprocessing
@@ -393,19 +393,19 @@ You can combine custom query parameters with query config:
 
 ```typescript
 // validators.ts
-import { z } from "zod"
+import { z } from "@medusajs/framework/zod"
 import { createFindParams } from "@medusajs/medusa/api/utils/validators"
 
-export const GetProductsSchema = createFindParams().merge(
-  z.object({
-    category_id: z.string().optional(),
-    in_stock: z.preprocess(
-      (val) => val === "true",
-      z.boolean().optional()
-    ),
-  })
-)
+export const GetProductsSchema = z.object({
+  category_id: z.string().optional(),
+  in_stock: z.preprocess(
+    (val) => val === "true",
+    z.boolean().optional()
+  ),
+}).extend(createFindParams().shape)
 ```
+
+**⚠️ Zod v4:** Medusa uses Zod v4 (since v2.14.0), where `.merge()` is removed. Combine schemas with `.extend(otherSchema.shape)`, and always import Zod from `@medusajs/framework/zod` — not from `zod` directly.
 
 ```typescript
 // route.ts
@@ -802,12 +802,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
 ```typescript
 // validators.ts
-export const GetMyEntitiesSchema = createFindParams().merge(
-  z.object({
-    q: z.string().optional(), // Search query
-    status: z.enum(["active", "pending", "completed"]).optional(),
-  })
-)
+export const GetMyEntitiesSchema = z.object({
+  q: z.string().optional(), // Search query
+  status: z.enum(["active", "pending", "completed"]).optional(),
+}).extend(createFindParams().shape)
 
 // middlewares.ts
 export default defineMiddlewares({

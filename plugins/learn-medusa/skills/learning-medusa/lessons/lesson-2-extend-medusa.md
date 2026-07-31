@@ -392,7 +392,7 @@ import {
   defineMiddlewares,
   validateAndTransformBody, // If already importing
 } from "@medusajs/framework/http"
-import { z } from "zod"
+import { z } from "@medusajs/framework/zod"
 
 export default defineMiddlewares({
   routes: [

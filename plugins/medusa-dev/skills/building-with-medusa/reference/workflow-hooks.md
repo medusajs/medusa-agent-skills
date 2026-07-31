@@ -41,7 +41,25 @@ createProductsWorkflow.hooks.productsCreated(
 
 - `createProductsWorkflow.hooks.productsCreated` - After products are created
 - `createOrderWorkflow.hooks.orderCreated` - After an order is created
+- `updateCartPromotionsWorkflow.hooks.setPromotionContext` - Inject extra context into promotion computation (v2.15.0+)
+- `upsertTaxLinesWorkflow.hooks.setTaxLineContext`, `updateTaxLinesWorkflow.hooks.setTaxLineContext`, `updateOrderTaxLinesWorkflow.hooks.setTaxLineContext` - Customize the context passed to tax calculation (v2.16.0+)
 - Ask MedusaDocs for specific workflow hooks and their input parameters
+
+**Context hooks** (`setPromotionContext`, `setTaxLineContext`) are the supported way to feed custom data into Medusa's promotion and tax calculation instead of overriding the workflows:
+
+```typescript
+// src/workflows/hooks/promotion.ts
+import { StepResponse } from "@medusajs/framework/workflows-sdk"
+import { updateCartPromotionsWorkflow } from "@medusajs/medusa/core-flows"
+
+updateCartPromotionsWorkflow.hooks.setPromotionContext(
+  ({ cart }, { container }) => {
+    if (cart.items.length >= 2) {
+      return new StepResponse({ company_id: "company_123" })
+    }
+  }
+)
+```
 
 ## When to Use Hooks vs Subscribers
 

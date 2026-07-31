@@ -43,7 +43,7 @@ Let me verify your implementation. Please share the following:
 Show me your `src/api/admin/brands/validators.ts` file.
 
 **Key things to check**:
-- [ ] Imports `z` from "zod"
+- [ ] Imports `z` from "@medusajs/framework/zod"
 - [ ] Defines `CreateBrandSchema` with `z.object()`
 - [ ] Has `name` field with `z.string()`
 - [ ] Exports schema as named export
