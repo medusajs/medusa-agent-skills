@@ -548,8 +548,8 @@ throw new MedusaError(MedusaError.Types.INVALID_DATA, "Invalid input provided")
 // Unauthorized
 throw new MedusaError(MedusaError.Types.UNAUTHORIZED, "Authentication required")
 
-// Conflict
-throw new MedusaError(MedusaError.Types.CONFLICT, "Resource already exists")
+// Conflict (message is replaced by a default; use NOT_ALLOWED if the client needs details)
+throw new MedusaError(MedusaError.Types.CONFLICT, "Operation conflicts with an ongoing transaction")
 
 // Other types: INVALID_STATE, NOT_ALLOWED, DUPLICATE_ERROR
 ```
