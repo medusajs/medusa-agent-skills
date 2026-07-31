@@ -1,0 +1,360 @@
+name: Sync Medusa Docs Changes
+
+# Reacts to a documentation commit merged in medusajs/medusa and, when that
+# commit affects content this repository restates, opens a pull request updating
+# the affected skill files.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   MEDUSA_APP_ID           App ID of the Medusa GitHub App
+#   MEDUSA_APP_PRIVATE_KEY  PEM private key of the Medusa GitHub App
+#   ANTHROPIC_API_KEY       Anthropic API key used by claude-code-base-action
+#
+# The Medusa GitHub App must be installed on THIS repository with
+# `contents: write` and `pull-requests: write`. Every commit and pull request
+# this workflow creates is attributed to that app, never to a personal account
+# and never to the default GITHUB_TOKEN.
+
+on:
+  repository_dispatch:
+    types: [medusa-docs-updated]
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: "Full 40-character SHA of a medusajs/medusa docs commit to process"
+        required: true
+        type: string
+
+# Two docs commits merged close together must not race on the same base branch,
+# and neither may be dropped -- so serialize instead of cancelling.
+concurrency:
+  group: sync-medusa-docs-changes
+  cancel-in-progress: false
+
+permissions:
+  contents: read # writes go through the app token, not GITHUB_TOKEN
+
+env:
+  DOCS_REPO: medusajs/medusa
+  WORK_DIR: /tmp/docs-change
+
+jobs:
+  sync:
+    name: Sync docs changes into skills
+    runs-on: ubuntu-latest
+    steps:
+      # Must be first: everything that writes to this repository uses this token.
+      # If this step fails, the Medusa GitHub App is not installed on this
+      # repository or MEDUSA_APP_ID / MEDUSA_APP_PRIVATE_KEY are wrong.
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.MEDUSA_APP_ID }}
+          private-key: ${{ secrets.MEDUSA_APP_PRIVATE_KEY }}
+
+      - name: Resolve and validate commit SHA
+        id: sha
+        env:
+          DISPATCH_SHA: ${{ github.event.client_payload.commit_sha }}
+          INPUT_SHA: ${{ inputs.commit_sha }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SHA="$INPUT_SHA"
+          else
+            SHA="$DISPATCH_SHA"
+          fi
+
+          if ! printf '%s' "$SHA" | grep -qE '^[0-9a-fA-F]{40}$'; then
+            echo "::error::invalid or missing commit_sha in dispatch payload"
+            exit 1
+          fi
+
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${SHA:0:8}" >> "$GITHUB_OUTPUT"
+          echo "Processing $DOCS_REPO commit $SHA"
+
+      # A repository_dispatch that carries no file list has nothing to act on.
+      # A workflow_dispatch never carries one, and takes the file list from the
+      # commit API instead, so it must not exit here.
+      - name: Check the payload carries docs files
+        id: payload-files
+        env:
+          CHANGED_FILES_JSON: ${{ toJSON(github.event.client_payload.changed_files) }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          COUNT=$(printf '%s' "$CHANGED_FILES_JSON" | jq 'if type == "array" then length else 0 end')
+          if [ "$COUNT" -eq 0 ]; then
+            echo "no docs files in payload"
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "proceed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        if: steps.payload-files.outputs.proceed == 'true'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        if: steps.payload-files.outputs.proceed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The default GITHUB_TOKEN can read the public medusajs/medusa repository,
+      # so the app token is deliberately not used here. Note the commits API
+      # returns at most 300 files; larger commits are reported as such.
+      - name: Fetch the docs commit
+        if: steps.payload-files.outputs.proceed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$WORK_DIR"
+          if ! gh api "repos/$DOCS_REPO/commits/$SHA?per_page=300" > "$WORK_DIR/commit-api.json" 2> "$WORK_DIR/commit-api.err"; then
+            # A well-formed SHA that does not exist answers 422 ("No commit
+            # found for SHA"), not 404 -- both mean the same thing here.
+            if grep -qE 'HTTP 404|HTTP 422|Not Found|No commit found' "$WORK_DIR/commit-api.err"; then
+              echo "::error::commit $SHA was not found in $DOCS_REPO. It may have been force-pushed away or the SHA is wrong. Refusing to proceed on partial data."
+            else
+              echo "::error::could not fetch commit $SHA from $DOCS_REPO"
+              cat "$WORK_DIR/commit-api.err"
+            fi
+            exit 1
+          fi
+          TOTAL=$(jq '.files | length' "$WORK_DIR/commit-api.json")
+          echo "commit API returned $TOTAL file entries"
+          if [ "$TOTAL" -ge 300 ]; then
+            echo "::warning::the commits API caps its file list at 300 entries; this commit may have more."
+          fi
+
+      # Mechanical filtering only: build output, generated TSDoc references, and
+      # docs apps no skill restates are dropped here. Whether the remaining
+      # files actually affect this repository is Claude's call, not a hardcoded
+      # path mapping's.
+      - name: Normalize and filter the changed-file list
+        id: resolve
+        if: steps.payload-files.outputs.proceed == 'true'
+        env:
+          PAYLOAD_JSON: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          set -euo pipefail
+          node scripts/resolve-docs-commit.mjs \
+            --commit-api "$WORK_DIR/commit-api.json" \
+            --output-dir "$WORK_DIR"
+
+      - name: Report commit with no docs content
+        if: steps.payload-files.outputs.proceed != 'true' || steps.resolve.outputs.has_docs_files != 'true'
+        run: |
+          set -euo pipefail
+          if [ -f "$WORK_DIR/changed-files.json" ]; then
+            echo "no authored docs files in this commit after filtering build output and generated references"
+            jq -r '.ignored[] | "ignored: [\(.status)] \(.path) - \(.reason)"' "$WORK_DIR/changed-files.json"
+          else
+            echo "no docs files in payload"
+          fi
+          echo "No pull request opened."
+
+      - name: Run Claude Code to update affected skills
+        if: steps.resolve.outputs.has_docs_files == 'true'
+        uses: anthropics/claude-code-base-action@e8132bc5e637a42c27763fc757faa37e1ee43b34 # beta / v0.0.63
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: .github/prompts/sync-medusa-docs-changes.md
+          # The prompt tells the agent to confirm Medusa behavior against the
+          # docs, so give it the same MCP server the plugins ship with.
+          mcp_config: '{"mcpServers":{"MedusaDocs":{"type":"http","url":"https://docs.medusajs.com/mcp"}}}'
+          allowed_tools: "Read,Write,Edit,Glob,Grep,WebFetch,mcp__MedusaDocs,Bash(node scripts/validate-skills.mjs),Bash(ls:*),Bash(cat:*),Bash(find:*)"
+          max_turns: 60
+          timeout_minutes: 30
+
+      # The action and the model both tend to drop scratch files into the
+      # working tree -- `output.txt` most often. They are not skill content, so
+      # they would trip the "modified outside plugins/" check below and fail an
+      # otherwise good run. Delete them before anything looks at the diff.
+      # Only untracked files are removed, so a real repository file with one of
+      # these names would be left alone and still fail the check.
+      - name: Remove Claude scratch artifacts
+        if: steps.resolve.outputs.has_docs_files == 'true'
+        run: |
+          set -euo pipefail
+          # If the summary landed at the repo root instead of the work dir,
+          # rescue it rather than throwing away the PR body.
+          if [ -f summary.md ] && ! git ls-files --error-unmatch summary.md >/dev/null 2>&1; then
+            [ -f "$WORK_DIR/summary.md" ] || mv summary.md "$WORK_DIR/summary.md"
+            rm -f summary.md
+            echo "Moved a stray summary.md into $WORK_DIR"
+          fi
+
+          for artifact in output.txt output.json claude-execution-output.json execution-output.json; do
+            [ -e "$artifact" ] || continue
+            if git ls-files --error-unmatch "$artifact" >/dev/null 2>&1; then
+              echo "::warning::$artifact is tracked in this repository and was left in place"
+              continue
+            fi
+            rm -rf "$artifact"
+            echo "Removed scratch artifact $artifact"
+          done
+
+      # There is no lint/build/test command in this repository (no package.json),
+      # so this integrity check stands in for one. It fails the run rather than
+      # opening a pull request with malformed skill content.
+      - name: Validate skill content
+        if: steps.resolve.outputs.has_docs_files == 'true'
+        run: node scripts/validate-skills.mjs
+
+      - name: Detect edits on disk
+        id: diff
+        if: steps.resolve.outputs.has_docs_files == 'true'
+        run: |
+          set -euo pipefail
+          # Check for strays first. A run that edited nothing but left a file
+          # outside plugins/ behind is still a prompt violation and must fail
+          # loudly rather than pass as "nothing to do".
+          # cut -c4- keeps paths containing spaces intact.
+          STRAY=$(git status --porcelain -- . ':(exclude)plugins' | cut -c4-)
+          if [ -n "$STRAY" ]; then
+            echo "::error::files outside plugins/ were created or modified, which the prompt forbids:"
+            echo "$STRAY"
+            exit 1
+          fi
+
+          CHANGED=$(git status --porcelain -- plugins | cut -c4-)
+          if [ -z "$CHANGED" ]; then
+            echo "No skill files changed on disk. No pull request opened."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED" > "$WORK_DIR/changed-plugin-files.txt"
+          echo "Changed files:"
+          echo "$CHANGED"
+
+      # Runs after the plugins-only check above, so Claude is still forbidden
+      # from touching .claude-plugin/ while the workflow itself is free to.
+      # An edited skill that ships under an unchanged version is not picked up
+      # by installs, so every content change moves a version.
+      - name: Bump plugin and marketplace versions
+        id: bump
+        if: steps.resolve.outputs.has_docs_files == 'true' && steps.diff.outputs.has_changes == 'true'
+        run: |
+          set -euo pipefail
+          node scripts/bump-versions.mjs --output "$WORK_DIR/version-bumps.md" \
+            < "$WORK_DIR/changed-plugin-files.txt"
+
+      - name: Build pull request body
+        id: pr-body
+        if: steps.resolve.outputs.has_docs_files == 'true' && steps.diff.outputs.has_changes == 'true'
+        run: |
+          set -euo pipefail
+          {
+            echo "## Automated skill update from a Medusa docs change"
+            echo
+            echo "Source commit: $(jq -r '.url' "$WORK_DIR/commit.json")"
+            echo
+            echo "> $(jq -r '.message' "$WORK_DIR/commit.json")"
+            echo
+            echo "File list source: $(jq -r '.file_list_source' "$WORK_DIR/commit.json")"
+            echo
+            echo "### Docs files Claude reviewed"
+            echo
+            jq -r '.considered[] | "- `\(.path)` (\(.status))" + (if .patch_omitted then " - diff omitted, over the patch budget" else "" end)' "$WORK_DIR/changed-files.json"
+            echo
+            # Claude reports what it changed and what it could not judge. The
+            # fallback keeps the body honest if it never wrote a summary.
+            if [ -f "$WORK_DIR/summary.md" ]; then
+              cat "$WORK_DIR/summary.md"
+            else
+              echo "### Files updated"
+              echo
+              git status --porcelain -- plugins | cut -c4- | sed 's/^/- `/; s/$/`/'
+              echo
+              echo "Claude did not write a summary, so this list is derived from the diff."
+            fi
+            echo
+            if [ -s "$WORK_DIR/version-bumps.md" ]; then
+              cat "$WORK_DIR/version-bumps.md"
+            fi
+            echo "---"
+            echo
+            echo "Generated by the \`sync-medusa-docs-changes\` workflow. Review before merging: the edits are model-generated and may have missed context."
+          } > "$WORK_DIR/pr-body.md"
+          cat "$WORK_DIR/pr-body.md"
+
+      - name: Commit and push to a dedicated branch
+        id: push
+        if: steps.resolve.outputs.has_docs_files == 'true' && steps.diff.outputs.has_changes == 'true'
+        env:
+          SHORT_SHA: ${{ steps.sha.outputs.short_sha }}
+        run: |
+          set -euo pipefail
+          BRANCH="docs-sync/medusa-$SHORT_SHA"
+          git config user.name "medusa-bot[bot]"
+          git config user.email "medusa-bot[bot]@users.noreply.github.com"
+          # Deterministic branch name so a re-run of the same docs commit updates
+          # the existing pull request instead of opening a second one.
+          git checkout -B "$BRANCH"
+          # .claude-plugin holds the marketplace manifest, written by the bump
+          # step above -- never by Claude.
+          git add -- plugins .claude-plugin
+          git commit -m "chore(skills): sync with medusa docs commit $SHORT_SHA"
+          # Never force-push: a plain push to a branch we just branched from the
+          # default branch either fast-forwards or fails loudly.
+          git push origin "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update the pull request
+        if: steps.resolve.outputs.has_docs_files == 'true' && steps.diff.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ steps.push.outputs.branch }}
+          SHORT_SHA: ${{ steps.sha.outputs.short_sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TITLE="chore(skills): sync with Medusa docs commit $SHORT_SHA"
+
+          EXISTING=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --repo "$REPO" \
+              --title "$TITLE" \
+              --body-file "$WORK_DIR/pr-body.md"
+            echo "Updated existing pull request #$EXISTING"
+            exit 0
+          fi
+
+          if ! gh pr create --repo "$REPO" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "$TITLE" \
+            --body-file "$WORK_DIR/pr-body.md" 2> "$WORK_DIR/pr-create.err"; then
+            if grep -qE 'HTTP 40[34]|Resource not accessible' "$WORK_DIR/pr-create.err"; then
+              echo "::error::could not open the pull request with the Medusa GitHub App token. The app is either not installed on $REPO or lacks contents:write and pull-requests:write. Not falling back to any other credential."
+            fi
+            cat "$WORK_DIR/pr-create.err"
+            exit 1
+          fi
+
+      # The Claude step and the validation step both run before anything is
+      # pushed, so a failure there leaves no branch behind. This only cleans up
+      # if the push succeeded and a later step failed.
+      - name: Clean up branch on failure
+        if: failure() && steps.push.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ steps.push.outputs.branch }}
+          REPO: ${{ github.repository }}
+        run: |
+          OPEN=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json number --jq '.[0].number' || true)
+          if [ -z "$OPEN" ]; then
+            gh api --method DELETE "repos/$REPO/git/refs/heads/$BRANCH" || true
+            echo "Deleted partial branch $BRANCH"
+          fi
