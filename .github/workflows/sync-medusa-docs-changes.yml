@@ -169,6 +169,14 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt_file: .github/prompts/sync-medusa-docs-changes.md
+          # Pin the model explicitly. The Claude Code CLI bundled in this
+          # (pinned, and therefore frozen) action defaults to
+          # claude-sonnet-4-20250514, which has since been retired and now
+          # answers 404. Leaving the default in place ties this workflow's
+          # lifetime to a model deprecation schedule it cannot see.
+          # claude-sonnet-4-6 is dateless but is still a pinned snapshot, not
+          # an evergreen pointer, so it will not drift under us.
+          model: claude-sonnet-4-6
           # The prompt tells the agent to confirm Medusa behavior against the
           # docs, so give it the same MCP server the plugins ship with.
           mcp_config: '{"mcpServers":{"MedusaDocs":{"type":"http","url":"https://docs.medusajs.com/mcp"}}}'
