@@ -165,7 +165,7 @@ The Medusa SDK is organized by resources:
 - `sdk.store.cart.*` - Cart operations
 - `sdk.store.category.*` - Category operations
 - `sdk.store.customer.*` - Customer operations (authenticated)
-- `sdk.store.order.*` - Order operations (authenticated)
+- `sdk.store.order.*` - Order operations (retrieval by ID does not require authentication; listing orders requires customer authentication)
 - `sdk.store.payment.*` - Payment operations
 - `sdk.store.fulfillment.*` - Shipping/fulfillment operations
 - `sdk.store.region.*` - Region operations
