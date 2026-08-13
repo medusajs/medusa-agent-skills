@@ -385,7 +385,7 @@ import { UIMatch } from "react-router-dom"
 
 export const handle = {
   seo: (match: UIMatch<BrandResponse>) => ({
-    title: match.data?.brand.name || "Brand",
+    title: match.loaderData?.brand.name || "Brand",
   }),
 }
 ```
