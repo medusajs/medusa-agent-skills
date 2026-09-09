@@ -47,7 +47,9 @@ const [products, count] = await productService.listAndCountProducts(
 ## Basic Query Structure
 
 ```typescript
-const query = req.scope.resolve("query")
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
 const { data } = await query.graph({
   entity: "entity_name",     // The entity to query
@@ -65,8 +67,10 @@ const { data } = await query.graph({
 ### Outside Workflows (API Routes, Subscribers, Scheduled Jobs)
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 // In API routes
-const query = req.scope.resolve("query")
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
 const { data: products } = await query.graph({
   entity: "product",
@@ -74,7 +78,7 @@ const { data: products } = await query.graph({
 })
 
 // In subscribers/scheduled jobs
-const query = container.resolve("query")
+const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
 const { data: customers } = await query.graph({
   entity: "customer",
@@ -658,7 +662,9 @@ Before using `query.index()`, ensure the Index Module is configured:
 #### Using query.index()
 
 ```typescript
-const query = req.scope.resolve("query")
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
 // ✅ CORRECT: Filter products by linked brand name using Index Module
 const { data: products } = await query.index({
@@ -748,8 +754,10 @@ Need to filter by linked module properties?
 Use `throwIfKeyNotFound` to validate that a record exists before performing operations:
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 // Outside workflows
-const query = req.scope.resolve("query")
+const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
 const { data } = await query.graph({
   entity: "product",
@@ -900,8 +908,10 @@ const { data: details } = await query.graph({
 ### Pattern: List with Search
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { q } = req.validatedQuery
 
   const filters: any = {}
@@ -923,8 +933,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 ### Pattern: Retrieve with Validation
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { id } = req.params
 
   // Throws 404 if product doesn't exist
@@ -943,8 +955,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 ### Pattern: Query with Relations and Filters
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { category_id } = req.validatedQuery
 
   const { data: products } = await query.graph({
@@ -974,8 +988,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 ### Pattern: Count Records
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
   const { data, metadata } = await query.graph({
     entity: "product",
@@ -994,8 +1010,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 ### Pattern: Recent Items
 
 ```typescript
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  const query = req.scope.resolve("query")
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
 
   const { data: recentProducts } = await query.graph({
     entity: "product",
