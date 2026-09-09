@@ -250,10 +250,10 @@ export const myWorkflow = createWorkflow(
 Outside workflows or in workflow steps, use the `link` utility to create and manage links between records. **Order MUST match `defineLink()` here too:**
 
 ```typescript
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 
 // In an API route or workflow step
-const link = container.resolve(ContainerRegistrationKeys.LINK)
+const link = container.resolve("link")
 
 const BRAND_MODULE = "brand"
 

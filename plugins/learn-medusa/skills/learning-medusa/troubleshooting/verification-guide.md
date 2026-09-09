@@ -413,7 +413,7 @@ Test creating a link:
 import { Modules } from "@medusajs/framework/utils"
 
 async function testLinkCreation() {
-  const link = container.resolve(ContainerRegistrationKeys.LINK)
+  const link = container.resolve("link")
 
   await link.create({
     [Modules.BRAND]: { brand_id: "brand_123" },
@@ -499,7 +499,7 @@ Test hook compensation works:
 // The hook should create the link, then roll it back when workflow fails
 
 async function testHookRollback() {
-  const linkService = container.resolve(ContainerRegistrationKeys.LINK)
+  const linkService = container.resolve("link")
 
   // Count links before
   const linksBefore = await linkService.list({})

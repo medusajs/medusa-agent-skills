@@ -45,12 +45,11 @@ Show me your `src/workflows/hooks/product-brand-link.ts` file (or wherever you d
 **Key things to check**:
 - [ ] Imports `createProductsWorkflow` from "@medusajs/medusa/core-flows"
 - [ ] Imports `StepResponse` from "@medusajs/framework/workflows-sdk"
-- [ ] Imports `ContainerRegistrationKeys` from "@medusajs/framework/utils"
 - [ ] Calls `createProductsWorkflow.hooks.productsCreated()`
 - [ ] Hook has async step function: `async ({ products, additional_data }, { container }) => { ... }`
 - [ ] Hook has async compensation function: `async (links, { container }) => { ... }`
 - [ ] Step function:
-  - Resolves link service: `container.resolve(ContainerRegistrationKeys.LINK)`
+  - Resolves link service: `container.resolve("link")`
   - Extracts brand_id from additional_data
   - Creates links using `link.create()`
   - Returns `new StepResponse(links, links)`
