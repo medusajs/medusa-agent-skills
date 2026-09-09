@@ -36,18 +36,19 @@ Create a TypeScript file in the `src/subscribers/` directory:
 ```typescript
 // src/subscribers/order-placed.ts
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 export default async function orderPlacedHandler({
   event: { eventName, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
   logger.info(`Order ${data.id} was placed`)
 
   // Resolve services
-  const orderService = container.resolve("order")
-  const notificationService = container.resolve("notification")
+  const orderService = container.resolve(Modules.ORDER)
+  const notificationService = container.resolve(Modules.NOTIFICATION)
 
   // Retrieve full order data
   const order = await orderService.retrieveOrder(data.id, {
@@ -75,12 +76,13 @@ export const config: SubscriberConfig = {
 ```typescript
 // src/subscribers/product-changes.ts
 import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 export default async function productChangesHandler({
   event: { eventName, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
-  const logger = container.resolve("logger")
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
   logger.info(`Product event: ${eventName} for product ${data.id}`)
 
