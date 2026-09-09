@@ -145,7 +145,7 @@ export const processCustomersWorkflow = createWorkflow(
 - ❌ No `new Date()` (will be fixed to load time) → Wrap in `transform()` for execution-time evaluation
 
 ### Conditional Logic
-- ❌ No `if`/`else` statements → Use `when(input, (input) => input.is_active).then(() => { /* steps */ })` instead
+- ❌ No `if`/`else` statements → Use `when("label", input, (input) => input.is_active).then(() => { /* steps */ })` instead
 - ❌ No ternary operators (`? :`) → Use `transform()` instead
 - ❌ No nullish coalescing (`??`) → Use `transform()` instead
 - ❌ No logical OR (`||`) → Use `transform()` instead

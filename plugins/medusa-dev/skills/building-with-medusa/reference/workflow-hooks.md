@@ -18,7 +18,7 @@ createProductsWorkflow.hooks.productsCreated(
       return new StepResponse([], [])
     }
 
-    const link = container.resolve("link")
+    const link = container.resolve(ContainerRegistrationKeys.LINK)
 
     // Link products to brand
     const linkData = products.map((product) => ({
@@ -31,7 +31,7 @@ createProductsWorkflow.hooks.productsCreated(
   },
   // Compensation (runs if workflow fails after this point)
   async (linkData, { container }) => {
-    const link = container.resolve("link")
+    const link = container.resolve(ContainerRegistrationKeys.LINK)
     await link.dismiss(linkData)
   }
 )

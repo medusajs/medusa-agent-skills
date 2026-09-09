@@ -283,7 +283,7 @@ await link.create({
 Use `query.graph()` to fetch data across linked modules. **Note**: `query.graph()` can retrieve linked data but **cannot filter by properties of linked modules** (data models in separate modules).
 
 ```typescript
-const query = container.resolve("query")
+const query = container.resolve(ContainerRegistrationKeys.QUERY)
 
 // ✅ Get products with their linked brands (no cross-module filtering)
 const { data: products } = await query.graph({
