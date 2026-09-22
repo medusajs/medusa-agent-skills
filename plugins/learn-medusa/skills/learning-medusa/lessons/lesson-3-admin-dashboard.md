@@ -278,7 +278,7 @@ export default defineMiddlewares({
 })
 ```
 
-**Documentation**: [Request Query Config Middleware](https://docs.medusajs.com/learn/fundamentals/module-links/query#request-query-configurations)
+**Documentation**: [Request Query Config Middleware](https://docs.medusajs.com/learn/fundamentals/query#request-query-configurations)
 
 ### Step 3.2: Create Brands UI Route
 
