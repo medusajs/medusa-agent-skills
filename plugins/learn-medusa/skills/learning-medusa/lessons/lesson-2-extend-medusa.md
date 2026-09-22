@@ -612,7 +612,7 @@ await query.graph({
 **Why "products" (plural)?**
 Because brands are linked to a list of products (`isList: true` in the link definition).
 
-**Documentation**: [Query Guide](https://docs.medusajs.com/learn/fundamentals/module-links/query)
+**Documentation**: [Query Guide](https://docs.medusajs.com/learn/fundamentals/query)
 
 ---
 

@@ -1093,6 +1093,6 @@ You'll be able to:
 - Retrieve a product's brand: `GET /admin/products/:id?fields=+brand.*`
 - List all brands with their products: `GET /admin/brands` returning linked products
 
-**Documentation**: [Module Links](https://docs.medusajs.com/learn/fundamentals/module-links) | [Workflow Hooks](https://docs.medusajs.com/learn/fundamentals/workflows/workflow-hooks) | [Query Guide](https://docs.medusajs.com/learn/fundamentals/module-links/query)
+**Documentation**: [Module Links](https://docs.medusajs.com/learn/fundamentals/module-links) | [Workflow Hooks](https://docs.medusajs.com/learn/fundamentals/workflows/workflow-hooks) | [Query Guide](https://docs.medusajs.com/learn/fundamentals/query)
 
 When you're ready, let me know and we'll start Lesson 2!
