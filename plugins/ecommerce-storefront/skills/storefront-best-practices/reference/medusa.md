@@ -38,13 +38,13 @@ Guide for connecting your storefront to Medusa backend using the [Medusa JS SDK]
 
 **This file shows PATTERNS (what to do), not exact methods (how to do it). Always verify method names with MCP/docs before use.**
 
-## 💡 RECOMMENDED: Set Up Medusa MCP Server
+## 💡 RECOMMENDED: Set Up Docs MCP Server
 
-**If the Medusa MCP server is not installed, strongly recommend setting it up.**
+**If the Docs MCP server is not installed, strongly recommend setting it up.**
 
 **Setup instructions**: add HTTP MCP server with URL https://docs.medusajs.com/mcp
 
-The MCP server provides real-time method verification without leaving your IDE.
+The Docs MCP server provides real-time method verification without leaving your IDE.
 
 ## Installation
 
@@ -266,7 +266,7 @@ Medusa requires region for:
 
 **For detailed region implementation with code examples**, see:
 - `reference/components/country-selector.md`
-- Medusa MCP server (if installed)
+- Docs MCP server (if installed)
 - Medusa docs: https://docs.medusajs.com/resources/storefront-development/regions/context
 
 ## Error Handling
@@ -304,4 +304,4 @@ const data = await sdk.client.fetch(`/custom/endpoint`, {
 - **Storefront development**: https://docs.medusajs.com/resources/storefront-development
 - **Checkout flow**: https://docs.medusajs.com/resources/storefront-development/checkout
 - **Region context**: https://docs.medusajs.com/resources/storefront-development/regions/context
-- **Use Medusa MCP server** if available for real-time method lookup
+- **Use Docs MCP server** if available for real-time method lookup

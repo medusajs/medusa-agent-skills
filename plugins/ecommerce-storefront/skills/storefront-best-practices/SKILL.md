@@ -160,7 +160,7 @@ Task 3: Implement Checkout Flow
 
 **For Medusa specifically:**
 - **Medusa pricing**: Display prices as-is - DO NOT divide by 100 (unlike Stripe, Medusa stores prices in display format)
-- **Medusa MCP server**: https://docs.medusajs.com/mcp - Recommend setup if not installed
+- **Docs MCP server**: https://docs.medusajs.com/mcp - Recommend setup if not installed
 - Load `reference/medusa.md` for Medusa-specific patterns (regions, pricing, etc.)
 
 ### Routing Patterns
@@ -402,7 +402,7 @@ Before implementing, watch out for these common ecommerce-specific pitfalls:
 - ❌ **ERROR: Writing code that calls backend APIs/SDKs without following the 5-step verification workflow** - You MUST: 1) PAUSE, 2) QUERY docs/MCP, 3) VERIFY with user, 4) Write code, 5) CHECK for type errors
 - ❌ **ERROR: Ignoring TypeScript errors on SDK methods** - Type errors mean you used wrong method names or parameters. Go back and verify with docs/MCP
 - ❌ **ERROR: Guessing API method names, SDK methods, or parameters** - Always verify exact method signatures before use
-- ❌ **ERROR: Not using Medusa MCP server when available** - If using Medusa backend, always query MCP server for methods
+- ❌ **ERROR: Not using Docs MCP server when available** - If using Medusa backend, always query Docs MCP server for methods
 - ❌ **ERROR: Copying code examples without verifying they're current** - Examples may be outdated, always verify first
 - ❌ Not detecting which backend is being used (check monorepo, ask user if unsure)
 - ❌ Assuming API structure without checking backend documentation or MCP server
