@@ -82,7 +82,7 @@ Options:
 
 **For Medusa:**
 - Documentation: https://docs.medusajs.com
-- MCP Server: If available, use Medusa MCP server for real-time API information
+- MCP Server: If available, use Docs MCP server for real-time API information
 - JS SDK docs: https://docs.medusajs.com/resources/js-sdk
 - See `reference/medusa.md` for detailed integration guide
 
