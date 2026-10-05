@@ -1,7 +1,7 @@
 {
   "name": "medusa-cloud",
   "description": "Skills for managing Medusa Cloud resources through the Cloud CLI (mcloud). Covers setup, deployments, debugging, local build reproduction, environment variable management, environment management, organizations, projects, logs, and authentication.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Medusa"
   },

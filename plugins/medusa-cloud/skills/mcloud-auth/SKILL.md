@@ -1,6 +1,6 @@
 ---
 name: mcloud-auth
-description: Execute mcloud authentication and context commands: login, logout, whoami, use, version, and signup. Use when setting up the CLI, switching accounts, verifying auth state, setting the active org/project/environment context, or checking the CLI version.
+description: "Execute mcloud authentication and context commands: login, logout, whoami, use, version, and signup. Use when setting up the CLI, switching accounts, verifying auth state, setting the active org/project/environment context, or checking the CLI version."
 allowed-tools: Bash(mcloud whoami*), Bash(mcloud use*), Bash(mcloud version*), Bash(mcloud logout*), Bash(jq*)
 ---
 

@@ -12,7 +12,7 @@
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs"
-import { join, dirname, resolve, relative } from "node:path"
+import { join, dirname, basename, resolve, relative } from "node:path"
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname)
 const problems = []
@@ -62,9 +62,9 @@ if (existsSync(marketplacePath)) {
   }
 }
 
-// 3. Every SKILL.md must have frontmatter with a slug `name` and a
-//    `description`, and no two skills may share a name (Claude Code resolves
-//    skills by the frontmatter name, not by directory).
+// 3. Every SKILL.md must have frontmatter with a slug `name` that matches its
+//    directory and a `description`, and no two skills may share a name.
+//    Claude Code silently skips a skill whose frontmatter is not valid YAML.
 const seenNames = new Map()
 const skillFiles = allFiles.filter((f) => f.endsWith("/SKILL.md"))
 if (skillFiles.length === 0) {
@@ -94,6 +94,22 @@ for (const file of skillFiles) {
       `${rel(file)}: frontmatter name "${name}" is not a lowercase kebab-case slug`
     )
   }
+  const dirName = basename(dirname(file))
+  if (name && name !== dirName) {
+    problems.push(
+      `${rel(file)}: frontmatter name "${name}" does not match its directory "${dirName}"`
+    )
+  }
+
+  for (const [, key, value] of frontmatter.matchAll(/^([\w-]+):[ \t]+(.+)$/gm)) {
+    if (/^["'|>]/.test(value)) continue
+    if (/: |:$| #/.test(value) || /^[-?:,\[\]{}#&*!%@`]/.test(value)) {
+      problems.push(
+        `${rel(file)}: frontmatter "${key}" is an unquoted value YAML cannot parse -- wrap it in double quotes`
+      )
+    }
+  }
+
   if (name && seenNames.has(name)) {
     problems.push(
       `${rel(file)}: duplicate skill name "${name}", also used by ${seenNames.get(name)}`
