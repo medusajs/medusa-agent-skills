@@ -39,7 +39,7 @@ import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 
 export default async function orderPlacedHandler({
-  event: { eventName, data },
+  event: { data },
   container,
 }: SubscriberArgs<{ id: string }>) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
@@ -79,15 +79,15 @@ import { SubscriberArgs, type SubscriberConfig } from "@medusajs/framework"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 
 export default async function productChangesHandler({
-  event: { eventName, data },
+  event: { name, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
-  logger.info(`Product event: ${eventName} for product ${data.id}`)
+  logger.info(`Product event: ${name} for product ${data.id}`)
 
   // Handle different events
-  switch (eventName) {
+  switch (name) {
     case "product.created":
       // Handle product creation
       break
@@ -197,7 +197,7 @@ Use these to sync stock to external systems or alert on low levels. `inventory-l
 ```typescript
 interface SubscriberArgs<T> {
   event: {
-    eventName: string // e.g., "order.placed"
+    name: string // e.g., "order.placed"
     data: T // Event payload (usually contains { id: string })
   }
   container: MedusaContainer // DI container
@@ -343,18 +343,18 @@ export const config: SubscriberConfig = {
 
 ```typescript
 export default async function mySubscriber({
-  event: { eventName, data },
+  event: { name, data },
   container,
 }: SubscriberArgs<{ id: string }>) {
   const logger = container.resolve("logger")
 
-  logger.info(`Handling ${eventName} for ${data.id}`)
+  logger.info(`Handling ${name} for ${data.id}`)
 
   try {
     // Subscriber logic
-    logger.info(`Successfully handled ${eventName}`)
+    logger.info(`Successfully handled ${name}`)
   } catch (error) {
-    logger.error(`Failed to handle ${eventName}: ${error.message}`)
+    logger.error(`Failed to handle ${name}: ${error.message}`)
   }
 }
 ```
