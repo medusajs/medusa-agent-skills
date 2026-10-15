@@ -17,6 +17,8 @@ SEO is critical for ecommerce - organic search drives high-intent traffic. Prope
 
 **Assumed knowledge**: AI agents know basic SEO (meta tags, Open Graph, Core Web Vitals). This guide focuses on ecommerce-specific patterns.
 
+**Agent-friendliness**: AI shopping agents rely on the same signals plus more (`ProductGroup` variants, return/shipping structured data, robots.txt rules for AI bots, llms.txt). Load `agent-friendly.md` alongside this file.
+
 ### Every Product Page Needs
 
 - Unique title and description (product name + features)

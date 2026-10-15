@@ -1,6 +1,6 @@
 ---
 name: storefront-best-practices
-description: ALWAYS use this skill when working on ecommerce storefronts, online stores, shopping sites. Use for ANY storefront component including checkout pages, cart, payment flows, product pages, product listings, navigation, homepage, or ANY page/component in a storefront. CRITICAL for adding checkout, implementing cart, integrating Medusa backend, or building any ecommerce functionality. Framework-agnostic (Next.js, SvelteKit, TanStack Start, React, Vue). Provides patterns, decision frameworks, backend integration guidance.
+description: ALWAYS use this skill when working on ecommerce storefronts, online stores, shopping sites. Use for ANY storefront component including checkout pages, cart, payment flows, product pages, product listings, navigation, homepage, or ANY page/component in a storefront. CRITICAL for adding checkout, implementing cart, integrating Medusa backend, making a store agent-friendly for AI shopping agents, or building any ecommerce functionality. Framework-agnostic (Next.js, SvelteKit, TanStack Start, React, Vue). Provides patterns, decision frameworks, backend integration guidance.
 ---
 
 # Ecommerce Storefront Best Practices
@@ -21,6 +21,7 @@ Comprehensive guidance for building modern, high-converting ecommerce storefront
 - Improving existing shopping experiences and conversion rates
 - Optimizing for usability, accessibility, and SEO
 - Designing mobile-responsive ecommerce experiences
+- Making a storefront agent-friendly (AI shopping agents, AI search, agentic commerce)
 
 **Example prompts that should trigger this skill:**
 - "Add a checkout page"
@@ -29,6 +30,7 @@ Comprehensive guidance for building modern, high-converting ecommerce storefront
 - "Connect to Medusa backend"
 - "Add navigation menu"
 - "Build homepage for store"
+- "Make my store agent-ready / AI-friendly"
 
 ## CRITICAL: Load Reference Files When Needed
 
@@ -49,6 +51,7 @@ Comprehensive guidance for building modern, high-converting ecommerce storefront
 - **Building product details?** → MUST load `reference/layouts/product-details.md` first
 - **Implementing checkout?** → MUST load `reference/layouts/checkout.md` first
 - **Optimizing for SEO?** → MUST load `reference/seo.md` first
+- **Making the store agent-friendly, or building product pages, add-to-cart, search, footer, robots.txt, sitemap or structured data?** → MUST load `reference/agent-friendly.md`
 - **Optimizing for mobile?** → MUST load `reference/mobile-responsiveness.md` first
 
 **Minimum requirement:** Load at least 1-2 reference files relevant to your specific task before implementing.
@@ -113,6 +116,14 @@ Task 3: Implement Checkout Flow
 ### SEO
 - **Product schema (JSON-LD) required** - Critical for Google Shopping and rich snippets
 - Use [PageSpeed Insights](https://pagespeed.web.dev/) to measure Core Web Vitals
+
+### Agent-Friendliness
+AI agents (ChatGPT, Claude, Perplexity, browser agents) shop on behalf of users. Most don't run JavaScript. Load `reference/agent-friendly.md` for full guidance. Top rules:
+- **Product name, visible price with currency and stock status MUST be in the server HTML** - verify with `curl`
+- **Add-to-cart MUST be a named `<button type="submit">` inside a `<form method="post" action="...">`**; variant selectors MUST be native radios/`<select>` inside that form
+- **Search MUST work at a GET URL** (`/search?q=`) with server-rendered results
+- **Don't block AI agents** (robots.txt, middleware, CAPTCHA on home/PDP/cart, gates replacing content)
+- Unknown product handles MUST return 404, not 200 or a homepage redirect
 
 ### Visual Design
 - **NEVER use emojis** in storefront UI - Use icons or images instead (unprofessional, accessibility issues)
@@ -200,6 +211,7 @@ reference/connecting-to-backend.md    - Framework detection, API setup, backend 
 reference/medusa.md                    - Medusa SDK integration, pricing, regions, TypeScript types
 reference/design.md                    - User preferences, brand identity, design systems
 reference/seo.md                       - Meta tags, structured data, Core Web Vitals
+reference/agent-friendly.md            - AI agent access, machine-readable product data, operable forms, llms.txt, UCP
 reference/mobile-responsiveness.md     - Mobile-first design, responsive breakpoints, touch interactions
 ```
 
@@ -256,7 +268,7 @@ reference/features/promotions.md       - Promotional banners, discount codes, sa
 7. Cart & Checkout → Read cart-popup.md, cart.md, checkout.md, order-confirmation.md
 8. User Account → Read account.md
 9. Additional Features → Read wishlist.md, promotions.md
-10. Optimization → SEO audit (seo.md), mobile testing (mobile-responsiveness.md)
+10. Optimization → SEO audit (seo.md), agent-friendliness audit (agent-friendly.md), mobile testing (mobile-responsiveness.md)
 ```
 
 Even if you create an implementation plan, refer back to the skill and load relevant reference files when implementing each step.
@@ -341,6 +353,7 @@ All guidance is framework-agnostic. Examples use React/TypeScript where code dem
 - Multi-language support
 - Multi-currency support
 - Live chat support
+- Agentic commerce protocols (UCP profile, MCP agent endpoint, OAuth discovery) - see `reference/agent-friendly.md`
 
 ## Top Ecommerce Mistakes to Avoid
 
@@ -398,7 +411,17 @@ Before implementing, watch out for these common ecommerce-specific pitfalls:
 - ❌ Missing meta tags and Open Graph for social sharing
 - ❌ Not optimizing Core Web Vitals (LCP, FID, CLS) - Use [PageSpeed Insights](https://pagespeed.web.dev/) or Lighthouse to measure
 
-**8. Backend Integration Mistakes**
+**8. Agent-Friendliness Mistakes** (see `reference/agent-friendly.md`)
+- ❌ Fetching product data or price in a client component (agents see an empty shell)
+- ❌ Add-to-cart as a `<div onClick>` or a `<button>` with no surrounding `<form action>`
+- ❌ Variant swatches as bare `<div>`/`<span>` without native inputs or ARIA state
+- ❌ Icon-only buttons (cart, search, menu, wishlist) without `aria-label`
+- ❌ JS-only search overlay with no GET results page
+- ❌ Blocking AI agents/search bots in robots.txt, middleware or WAF (blocking training crawlers is fine)
+- ❌ Forced IP-based redirect from `/` to a locale path
+- ❌ Unknown product URLs returning 200 or redirecting home (soft 404)
+
+**9. Backend Integration Mistakes**
 - ❌ **ERROR: Writing code that calls backend APIs/SDKs without following the 5-step verification workflow** - You MUST: 1) PAUSE, 2) QUERY docs/MCP, 3) VERIFY with user, 4) Write code, 5) CHECK for type errors
 - ❌ **ERROR: Ignoring TypeScript errors on SDK methods** - Type errors mean you used wrong method names or parameters. Go back and verify with docs/MCP
 - ❌ **ERROR: Guessing API method names, SDK methods, or parameters** - Always verify exact method signatures before use
