@@ -104,12 +104,12 @@ Frontend (admin dashboard/storefront via SDK)
 ### 5. Data Access Patterns (MEDIUM)
 
 - `data-price-format` - **CRITICAL**: Prices are stored as-is in Medusa (49.99 stored as 49.99, NOT in cents). Never multiply by 100 when saving or divide by 100 when displaying
-- `data-query-method` - Use `query.graph()` for retrieving data; use `query.index()` (Index Module) for filtering across linked modules
-- `data-query-graph` - Use `query.graph()` for cross-module queries with dot notation (without cross-module filtering)
-- `data-query-index` - Use `query.index()` when filtering by properties of linked data models in separate modules
+- `data-query-method` - Use `query.graph()` for retrieving data; use `query.index()` (Index Module) for guaranteed database-level filtering across linked modules
+- `data-query-graph` - Use `query.graph()` for cross-module queries with dot notation; starting from v2.18.0, it can also filter by linked data model properties (may filter in memory)
+- `data-query-index` - Use `query.index()` when you need guaranteed database-level filtering by properties of linked data models in separate modules
 - `data-list-and-count` - Use `listAndCount` for single-module paginated queries
-- `data-linked-filtering` - `query.graph()` can't filter by linked module fields - use `query.index()` or query from that entity directly
-- `data-no-js-filter` - Don't use JavaScript `.filter()` on linked data - use database filters (`query.index()` or query the entity)
+- `data-linked-filtering` - `query.graph()` can filter by linked module fields starting from v2.18.0, but may do so in memory; use `query.index()` for guaranteed database-level filtering on large datasets
+- `data-no-js-filter` - Don't use JavaScript `.filter()` on linked data - use `query.graph()` filters (v2.18.0+), `query.index()`, or query the entity directly
 - `data-same-module-ok` - Can filter by same-module relations with `query.graph()` (e.g., product.variants)
 - `data-auth-middleware` - Trust `authenticate` middleware, don't manually check `req.auth_context`
 
@@ -182,10 +182,9 @@ Before implementing, verify you're NOT doing these:
 
 **Data Access:**
 - [ ] **CRITICAL**: Multiplying prices by 100 when saving or dividing by 100 when displaying (prices are stored as-is: $49.99 = 49.99)
-- [ ] Filtering by linked module fields with `query.graph()` (use `query.index()` or query from other side instead)
-- [ ] Using JavaScript `.filter()` on linked data (use `query.index()` or query the linked entity directly)
+- [ ] Using JavaScript `.filter()` on linked data - use `query.graph()` filters (v2.18.0+) or `query.index()` instead
 - [ ] Not using `query.graph()` for cross-module data retrieval
-- [ ] Using `query.graph()` when you need to filter across separate modules (use `query.index()` instead)
+- [ ] Using `query.graph()` on large datasets when filtering by linked module properties without the Index Module (may cause slow in-memory filtering)
 
 ## Validating Implementation
 

@@ -280,17 +280,17 @@ await link.create({
 
 ### Using query.graph() - Retrieve Linked Data
 
-Use `query.graph()` to fetch data across linked modules. **Note**: `query.graph()` can retrieve linked data but **cannot filter by properties of linked modules** (data models in separate modules).
+Use `query.graph()` to fetch data across linked modules. Starting from Medusa v2.18.0, it can also filter by properties of linked modules, though it may filter in memory depending on conditions.
 
 ```typescript
 const query = container.resolve("query")
 
-// ✅ Get products with their linked brands (no cross-module filtering)
+// ✅ Get products with their linked brands
 const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "title", "brand.*"], // brand.* fetches linked brand data
   filters: {
-    id: "prod_123", // ✅ Filter by product properties only
+    id: "prod_123", // ✅ Filter by product properties
   },
 })
 
@@ -300,40 +300,40 @@ const { data: brands } = await query.graph({
   fields: ["id", "name", "products.*"],
 })
 
-// ❌ DOES NOT WORK: Cannot filter products by linked brand properties
+// ✅ Filter products by linked brand properties (Medusa v2.18.0+, may filter in memory)
 const { data: products } = await query.graph({
   entity: "product",
   fields: ["id", "title", "brand.*"],
   filters: {
     brand: {
-      name: "Nike" // ❌ Fails: brand is in a different module
+      name: "Acme" // ✅ Works in v2.18.0+; may apply in memory
     }
   }
 })
 ```
 
-### Using query.index() - Filter Across Linked Modules
+### Using query.index() - Guaranteed Database-Level Filtering Across Linked Modules
 
-To filter by properties of linked modules (separate modules with module links), use `query.index()` from the Index Module:
+To guarantee database-level filtering by properties of linked modules (separate modules with module links), use `query.index()` from the Index Module:
 
 ```typescript
 const query = container.resolve("query")
 
-// ✅ Filter products by linked brand name using Index Module
+// ✅ Filter products by linked brand name using Index Module (always database-level)
 const { data: products } = await query.index({
   entity: "product",
   fields: ["*", "brand.*"],
   filters: {
     brand: {
-      name: "Nike" // ✅ Works with Index Module!
+      name: "Acme" // ✅ Always database-level with Index Module
     }
   }
 })
 ```
 
 **Key Distinction:**
-- **Same module relations** (e.g., Product → ProductVariant): Use `query.graph()` - filtering works ✅
-- **Different module links** (e.g., Product → Brand): Use `query.index()` for filtering ✅
+- **Same module relations** (e.g., Product → ProductVariant): Use `query.graph()` - always database-level filtering ✅
+- **Different module links** (e.g., Product → Brand): Use `query.graph()` (v2.18.0+, may filter in memory) or `query.index()` for guaranteed database-level filtering ✅
 
 **Index Module Requirements:**
 1. Install `@medusajs/index` package
