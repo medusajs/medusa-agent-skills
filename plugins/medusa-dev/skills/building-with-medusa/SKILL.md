@@ -55,8 +55,7 @@ Frontend (admin dashboard/storefront via SDK)
 - Only GET, POST, DELETE methods (never PUT/PATCH)
 - Workflows are required for ALL mutations
 - Business logic belongs in workflow steps, NOT routes
-- Query with `query.graph()` for cross-module data retrieval
-- Query with `query.index()` (Index Module) for filtering across separate modules with links
+- Query with `query.graph()` for cross-module data retrieval and filtering across linked modules
 - Module links maintain isolation between modules
 
 ## Rule Categories by Priority
@@ -104,12 +103,11 @@ Frontend (admin dashboard/storefront via SDK)
 ### 5. Data Access Patterns (MEDIUM)
 
 - `data-price-format` - **CRITICAL**: Prices are stored as-is in Medusa (49.99 stored as 49.99, NOT in cents). Never multiply by 100 when saving or divide by 100 when displaying
-- `data-query-method` - Use `query.graph()` for retrieving data; use `query.index()` (Index Module) for filtering across linked modules
-- `data-query-graph` - Use `query.graph()` for cross-module queries with dot notation (without cross-module filtering)
-- `data-query-index` - Use `query.index()` when filtering by properties of linked data models in separate modules
+- `data-query-method` - Use `query.graph()` for retrieving data and filtering across linked modules via cross-module joins
+- `data-query-graph` - Use `query.graph()` for cross-module queries with dot notation, including cross-module filtering with nested linked data model filters
 - `data-list-and-count` - Use `listAndCount` for single-module paginated queries
-- `data-linked-filtering` - `query.graph()` can't filter by linked module fields - use `query.index()` or query from that entity directly
-- `data-no-js-filter` - Don't use JavaScript `.filter()` on linked data - use database filters (`query.index()` or query the entity)
+- `data-linked-filtering` - Use `query.graph()` with nested linked data model filters to filter by linked module fields; `query.index()` is deprecated since v2.22.7
+- `data-no-js-filter` - Don't use JavaScript `.filter()` on linked data - use database filters (`query.graph()` with nested filters or query the entity)
 - `data-same-module-ok` - Can filter by same-module relations with `query.graph()` (e.g., product.variants)
 - `data-auth-middleware` - Trust `authenticate` middleware, don't manually check `req.auth_context`
 
@@ -182,10 +180,9 @@ Before implementing, verify you're NOT doing these:
 
 **Data Access:**
 - [ ] **CRITICAL**: Multiplying prices by 100 when saving or dividing by 100 when displaying (prices are stored as-is: $49.99 = 49.99)
-- [ ] Filtering by linked module fields with `query.graph()` (use `query.index()` or query from other side instead)
-- [ ] Using JavaScript `.filter()` on linked data (use `query.index()` or query the linked entity directly)
-- [ ] Not using `query.graph()` for cross-module data retrieval
-- [ ] Using `query.graph()` when you need to filter across separate modules (use `query.index()` instead)
+- [ ] Using JavaScript `.filter()` on linked data (use `query.graph()` with nested filters or query the linked entity directly)
+- [ ] Not using `query.graph()` for cross-module data retrieval and filtering
+- [ ] Using the deprecated `query.index()` method (use `query.graph()` with nested linked data model filters instead)
 
 ## Validating Implementation
 

@@ -312,45 +312,7 @@ const { data: products } = await query.graph({
 })
 ```
 
-### Using query.index() - Filter Across Linked Modules
-
-To filter by properties of linked modules (separate modules with module links), use `query.index()` from the Index Module:
-
-```typescript
-const query = container.resolve("query")
-
-// ✅ Filter products by linked brand name using Index Module
-const { data: products } = await query.index({
-  entity: "product",
-  fields: ["*", "brand.*"],
-  filters: {
-    brand: {
-      name: "Nike" // ✅ Works with Index Module!
-    }
-  }
-})
-```
-
-**Key Distinction:**
-- **Same module relations** (e.g., Product → ProductVariant): Use `query.graph()` - filtering works ✅
-- **Different module links** (e.g., Product → Brand): Use `query.index()` for filtering ✅
-
-**Index Module Requirements:**
-1. Install `@medusajs/index` package
-2. Add to `medusa-config.ts`
-3. Enable `MEDUSA_FF_INDEX_ENGINE=true` in `.env`
-4. Run `npx medusa db:migrate`
-5. Mark properties as `filterable` in link definition:
-
-```typescript
-// src/links/product-brand.ts
-defineLink(
-  { linkable: ProductModule.linkable.product, isList: true },
-  { linkable: BrandModule.linkable.brand, filterable: ["id", "name"] }
-)
-```
-
-See the [Querying Data reference](querying-data.md#querying-linked-data) for complete details on both methods.
+See the [Querying Data reference](querying-data.md#querying-linked-data) for complete details on filtering across linked modules using `query.graph()`.
 
 ## Advanced: Link with Custom Columns
 
